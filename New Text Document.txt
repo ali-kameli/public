@@ -1,0 +1,32 @@
+router.patch("/edit/:loan_id", verifyAccessToken, checkPermissions(['EMPLOYEE']), LoanController.loanEdit);
+
+
+  async loanEdit(req, res, next) {
+    try {
+      const { loan_id } = req.params;
+      const { referral } = req.body;
+  
+      // به‌روزرسانی مقدار referral
+      const [affectedRows] = await LoanModel.update(
+        { referral },
+        {
+          where: {
+            id: loan_id,
+          },
+        }
+      );
+  
+      // بررسی تعداد رکوردهای به‌روزرسانی شده
+      if (affectedRows === 0) {
+        throw createHttpError.BadRequest("شناسه وام یافت نشد یا تغییرات اعمال نشد");
+      }
+  
+      // بازگرداندن پاسخ موفقیت
+      return res.status(200).json({
+        message: "معرف با موفقیت معرفی شد",
+      });
+    } catch (error) {
+      // مدیریت خطاها
+      next(error);
+    }
+  }
